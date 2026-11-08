@@ -166,9 +166,25 @@
   .timeline time{flex:0 0 auto;color:var(--pine);font-size:.88rem;font-weight:500;font-variant-numeric:tabular-nums;min-width:6em}
   @media (max-width:560px){.timeline li{flex-direction:column;gap:2px}}
 
-  footer{padding:40px 0 52px;color:var(--muted);font-size:.84rem;border-top:1px solid var(--line)}
-  footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-  footer p{margin:0}
+  .btn.soon{border-style:dashed;color:var(--muted);border-color:#c9cfc8;cursor:default}
+  .btn.soon:hover{background:transparent}
+  .btn.soon .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block}
+  .soonbox{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;background:var(--card);border:1px dashed #c9cfc8;border-radius:16px;padding:24px 26px;max-width:720px}
+  .soonbox-badge{background:var(--amber-soft);color:var(--amber);font-weight:700;font-size:.82rem;letter-spacing:.06em;padding:6px 12px;border-radius:999px;white-space:nowrap}
+  .soonbox b{display:block;font-family:"Noto Serif KR",serif;font-size:1.05rem;margin-bottom:4px}
+  .soonbox p{margin:0;color:var(--muted);font-size:.92rem}
+  @media (max-width:480px){.soonbox{grid-template-columns:1fr}}
+
+  footer{padding:44px 0 52px;color:var(--muted);font-size:.84rem;border-top:1px solid var(--line);background:#eef1ec}
+  .foot-brand{font-family:"Noto Serif KR",serif;font-size:1.05rem;color:var(--ink);font-weight:600}
+  .foot-note{margin:6px 0 0;max-width:640px}
+  .biz{display:flex;flex-wrap:wrap;gap:8px 28px;margin:22px 0 0;padding:18px 0 0;border-top:1px solid var(--line)}
+  .biz div{display:flex;gap:8px}
+  .biz dt{color:#8a948e}
+  .biz dt::after{content:""}
+  .biz dd{margin:0;color:var(--ink)}
+  .copy{margin:16px 0 0;font-size:.8rem;color:#8a948e}
+  @media (max-width:560px){.biz{flex-direction:column;gap:6px}}
 </style>
 </head>
 <body>
@@ -187,7 +203,7 @@
         <li><a href="#research">연구</a></li>
         <li><a href="#info">이용 안내</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="#contact" class="cta">예약 문의</a></li>
+        <li><a href="#contact" class="cta">{% if site.booking_open %}예약 문의{% else %}예약 안내{% endif %}</a></li>
       </ul>
     </nav>
   </div>
@@ -203,8 +219,13 @@
         <p class="tagline">{{ c.tagline }}</p>
         <p class="lead">{{ c.lead }}</p>
         <div class="btns">
+          {%- if site.booking_open %}
           <a class="btn primary" href="#contact">예약 문의하기</a>
           <a class="btn" href="#services">상담 영역 보기</a>
+          {%- else %}
+          <a class="btn primary" href="#services">상담 영역 보기</a>
+          <a class="btn soon" href="#contact"><span class="dot"></span>상담 예약 준비 중</a>
+          {%- endif %}
         </div>
       </div>
       <div class="mark" aria-hidden="true">
@@ -335,7 +356,19 @@
     <div class="wrap">
       <div class="eyebrow">Reservation</div>
       <h2>예약 · 문의</h2>
+      {%- if site.booking_open %}
       <p class="sub">편한 방법으로 연락 주세요. 희망 날짜와 상담 방식(전화/화상)을 함께 알려주시면 빠르게 확정됩니다.</p>
+      {%- else %}
+      <p class="sub">{{ site.booking_notice }}</p>
+      <div class="soonbox">
+        <div class="soonbox-badge">준비 중</div>
+        <div>
+          <b>예약 오픈을 준비하고 있습니다</b>
+          <p>전화·화상 상담 예약 절차와 결제 방식을 정비하는 중입니다. 오픈 후에는 전화, 카카오톡 채널, 온라인 양식으로 신청하실 수 있습니다.</p>
+        </div>
+      </div>
+      {%- endif %}
+      {%- if site.booking_open %}
       <div class="channels">
         {%- if ct.phone and ct.phone != "" %}
         <div class="ch"><b>전화 · 문자</b><div class="v">{{ ct.phone }}</div>{% if ct.phone_hours and ct.phone_hours != "" %}<small>{{ ct.phone_hours }}</small>{% endif %}</div>
@@ -351,6 +384,7 @@
         {%- endif %}
         <div class="ch"><b>대면 상담 장소</b><div class="v">{% if ct.address and ct.address != "" %}{{ ct.address }}{% else %}예약 시 안내{% endif %}</div><small>사전 약속 후 진행</small></div>
       </div>
+      {%- endif %}
       {%- if site.emergency and site.emergency.size > 0 %}
       <div class="emergency">
         <h3>지금 위험하다고 느끼신다면</h3>
@@ -383,8 +417,22 @@
 
 <footer>
   <div class="wrap">
-    <p>© {{ site.time | date: "%Y" }} {{ c.name }}</p>
-    <p>본 상담은 의학적 진단·치료를 대신하지 않습니다.</p>
+    {%- assign co = site.company %}
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand">{{ c.name }}</div>
+        <p class="foot-note">{{ co.note }}</p>
+      </div>
+    </div>
+    <dl class="biz">
+      <div><dt>상호</dt><dd>{{ co.name }}</dd></div>
+      <div><dt>대표</dt><dd>{{ co.ceo }}</dd></div>
+      <div><dt>사업자등록번호</dt><dd>{{ co.reg_no }}</dd></div>
+      <div><dt>주소</dt><dd>{{ co.address }}</dd></div>
+      {%- if co.phone and co.phone != "" %}<div><dt>전화</dt><dd>{{ co.phone }}</dd></div>{% endif %}
+      {%- if co.email and co.email != "" %}<div><dt>이메일</dt><dd>{{ co.email }}</dd></div>{% endif %}
+    </dl>
+    <p class="copy">© {{ site.time | date: "%Y" }} {{ co.name }}. All rights reserved.</p>
   </div>
 </footer>
 
